@@ -3,9 +3,9 @@
 :toc: macro
 :source-highlighter: highlight.js
 
-=  Native Java REST API Demo Steps
+=  Native Reactive Java REST API Demo Steps
 
-In this demo, I'll show how to create native images with Micronaut, Quarkus, Spring Boot, and Helidon. You'll see how to run a secure, OAuth 2.0-protected, Java REST API that allows JWT authentication.
+In this demo, I'll show how to create native images with reactive versions of Micronaut, Quarkus, Spring Boot, and Helidon. You'll see how to run a secure, OAuth 2.0-protected, reactive Java REST API that allows JWT authentication.
 
 **Prerequisites:**
 
@@ -39,7 +39,7 @@ auth0 test token -a https://<your-auth0-domain>/api/v2/ -s openid
 
   TOKEN=eyJraWQiOiJYa2pXdjMzTDRBYU1ZSzNGM...
 
-== Make a Java REST API with Micronaut
+== Make a Reactive Java REST API with Micronaut
 
 . Use SDKMAN to install Micronaut's CLI and create an app:
 +
@@ -111,7 +111,7 @@ You should get a 200 response with your user id in it.
 
   http :8080/hello Authorization:"Bearer $TOKEN"
 
-== Create a Java REST API with Quarkus
+== Create a Reactive Java REST API with Quarkus
 
 . Use SDKMAN to install the Quarkus CLI and create a new app with JWT support:
 +
@@ -215,7 +215,7 @@ public class HelloResourceTest {
 
   http :8080/hello Authorization:"Bearer $TOKEN"
 
-== Start a Java REST API with Spring Boot
+== Start a Reactive Java REST API with Spring Boot
 
 . Use SDKMAN to install the Spring Boot CLI. Then, create a Spring Boot app with OAuth 2.0 support:
 +
@@ -283,7 +283,7 @@ TIP: To build a native app and a Docker container, use the Spring Boot Gradle pl
 
   http :8080/hello Authorization:"Bearer $TOKEN"
 
-== Build a Java REST API with Helidon
+== Build a Reactive Java REST API with Helidon
 
 . Use SDKMAN to install the Helidon CLI. Then, create a Helidon app:
 +
@@ -383,10 +383,7 @@ mp.jwt.verify.publickey.location=${mp.jwt.verify.issuer}.well-known/jwks.json
 +
 [source,properties]
 ----
-Args=--initialize-at-build-time=com.okta.rest \
-  --initialize-at-run-time=io.helidon.openapi.ExpandedTypeDescription \
-  --report-unsupported-elements-at-runtime \
-  -H:+AddAllCharsets
+Args=--initialize-at-build-time=com.okta.rest -H:+AddAllCharsets
 ----
 
 . Compile your Helidon app into a native executable using the `native-image` profile:
@@ -461,6 +458,6 @@ IMPORTANT: If you disagree with these numbers and think X framework should be fa
 ./memory.sh $TOKEN micronaut|quarkus|spring-boot|helidon
 ----
 
-== Native Java REST APIs FTW!
+== Native Reactive Java REST APIs FTW!
 
-🚀 Find the code on GitHub: https://github.com/oktadev/auth0-java-rest-api-examples[@oktadev/auth0-java-rest-api-examples]
+🚀 Find the code on GitHub: https://github.com/oktadev/auth0-java-rest-api-reactive-examples[@oktadev/auth0-java-rest-api-reactive-examples]
