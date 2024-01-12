@@ -41,6 +41,8 @@ auth0 test token -a https://<your-auth0-domain>/api/v2/ -s openid
 
 == Make a Reactive Java REST API with Micronaut
 
+Nothing needs to be done to make Micronaut reactive. It has no separate reactive web framework. See Piotr Minkowski's https://piotrminkowski.com/2019/11/12/micronaut-tutorial-reactive/[Micronaut Tutorial: Reactive] and https://guides.micronaut.io/latest/tag-reactive.html[Micronaut's Reactive Guides] for more information.
+
 . Use SDKMAN to install Micronaut's CLI and create an app:
 +
 [source,shell]
@@ -113,13 +115,13 @@ You should get a 200 response with your user id in it.
 
 == Create a Reactive Java REST API with Quarkus
 
-. Use SDKMAN to install the Quarkus CLI and create a new app with JWT support:
+. Use SDKMAN to install the Quarkus CLI and create a new app with OIDC support:
 +
 [source,shell]
 ----
 sdk install quarkus
 quarkus create app com.okta.rest:quarkus \
-  --extension="smallrye-jwt,resteasy-reactive" \
+  --extension="quarkus-oidc,resteasy-reactive" \
   --gradle
 ----
 
@@ -130,34 +132,36 @@ quarkus create app com.okta.rest:quarkus \
 package com.okta.rest;
 
 import io.quarkus.security.Authenticated;
-
+import io.smallrye.mutiny.Uni;
+import jakarta.inject.Inject;
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.Produces;
-import jakarta.ws.rs.core.Context;
 import jakarta.ws.rs.core.MediaType;
-import jakarta.ws.rs.core.SecurityContext;
-import java.security.Principal;
+import org.eclipse.microprofile.jwt.JsonWebToken;
 
 @Path("/hello")
 public class HelloResource {
 
+    @Inject
+    JsonWebToken jwt;
+
     @GET
+    @Path("/")
     @Authenticated
     @Produces(MediaType.TEXT_PLAIN)
-    public String hello(@Context SecurityContext context) {
-        Principal userPrincipal = context.getUserPrincipal();
-        return "Hello, " + userPrincipal.getName() + "!";
+    public Uni<String> hello() {
+        return Uni.createFrom().item("Hello, " + jwt.getName() + "!");
     }
+
 }
 ----
 
-. Add your Auth0 endpoints to `src/main/resources/application.properties`: [`qk-properties`]
+. Add your Auth0 issuer to `src/main/resources/application.properties`:
 +
 [source,properties]
 ----
-mp.jwt.verify.issuer=https://<your-auth0-domain>/
-mp.jwt.verify.publickey.location=${mp.jwt.verify.issuer}.well-known/jwks.json
+quarkus.oidc.auth-server-url=https://<your-auth0-domain>
 ----
 
 . Rename `GreetingResourceTest` to `HelloResourceTest` and modify it to expect a 401 instead of a 200:
@@ -184,6 +188,8 @@ public class HelloResourceTest {
 
 }
 ----
+
+For more information, see Quarkus' https://quarkus.io/guides/getting-started-reactive[Getting Started with Reactive] guide.
 
 === Run and Test Your Quarkus API with HTTPie
 
@@ -222,7 +228,7 @@ public class HelloResourceTest {
 [source,shell]
 ----
 sdk install springboot
-spring init -d=web,oauth2-resource-server,native -b=3.2.0 \
+spring init -d=webflux,oauth2-resource-server,native -b=3.2.0 \
   --group-id=com.okta.rest --package-name=com.okta.rest spring-boot
 ----
 +
@@ -290,7 +296,7 @@ TIP: To build a native app and a Docker container, use the Spring Boot Gradle pl
 [source,shell]
 ----
 sdk install helidon
-helidon init --flavor MP --groupid com.okta.rest \
+helidon init --flavor SE --groupid com.okta.rest \
   --artifactid helidon --package com.okta.rest --batch
 ----
 +
@@ -301,65 +307,109 @@ TIP: See https://blogs.oracle.com/developers/post/migrating-a-helidon-se-applica
 [source,xml]
 ----
 <dependency>
-    <groupId>io.helidon.microprofile.jwt</groupId>
-    <artifactId>helidon-microprofile-jwt-auth</artifactId>
+    <groupId>io.helidon.security.providers</groupId>
+    <artifactId>helidon-security-providers-jwt</artifactId>
 </dependency>
 ----
 
-. Add a `HelloResource` class that returns the user's information: [`h-hello`]
+. Add a `HelloResource` class that returns the user's information:
 +
 [source,java]
 ----
 package com.okta.rest.controller;
 
-import io.helidon.security.Principal;
-import io.helidon.security.annotations.Authenticated;
+import static io.helidon.http.Status.OK_200;
 
-import jakarta.ws.rs.GET;
-import jakarta.ws.rs.Path;
-import jakarta.ws.rs.core.Context;
+import io.helidon.common.media.type.MediaTypes;
+import io.helidon.security.SecurityContext;
+import io.helidon.webserver.http.HttpFeature;
+import io.helidon.webserver.http.HttpRouting;
+import io.helidon.webserver.http.ServerRequest;
+import io.helidon.webserver.http.ServerResponse;
 
-@Path("/hello")
-public class HelloResource {
+public class HelloResource implements HttpFeature {
 
-    @Authenticated
-    @GET
-    public String hello(@Context SecurityContext context) {
-        return "Hello, " + context.userName() + "!";
+    @Override
+    public void setup(HttpRouting.Builder routing) {
+        routing.get("/hello", this::hello);
+    }
+
+    public void hello(ServerRequest req, ServerResponse res) {
+        SecurityContext context = req.context().get(SecurityContext.class).orElseThrow();
+        res.status(OK_200);
+        res.headers().contentType(MediaTypes.TEXT_PLAIN);
+        res.send("Hello, " + context.userName() + "!");
     }
 }
 ----
 
-. Add a `HelloApplication` class in `src/main/java/com/okta/rest` to register your resource and configure JWT authentication: [`h-app`]
+. Add a `HelloApplication` class in `src/main/java/com/okta/rest` to register your resource and configure JWT authentication:
 +
 [source,java]
 ----
 package com.okta.rest;
 
+import java.net.URI;
+
 import com.okta.rest.controller.HelloResource;
-import org.eclipse.microprofile.auth.LoginConfig;
 
-import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.ws.rs.core.Application;
-import java.util.Set;
+import io.helidon.common.configurable.Resource;
+import io.helidon.config.Config;
+import io.helidon.security.Security;
+import io.helidon.security.providers.jwt.JwtProvider;
+import io.helidon.webserver.WebServer;
+import io.helidon.webserver.context.ContextFeature;
+import io.helidon.webserver.http.HttpRouting;
+import io.helidon.webserver.security.SecurityFeature;
 
-@LoginConfig(authMethod = "MP-JWT")
-@ApplicationScoped
-public class HelloApplication extends Application {
+public class HelloApplication {
 
-    @Override
-    public Set<Class<?>> getClasses() {
-        return Set.of(HelloResource.class);
+    public static void main(String[] args) {
+
+        var config = Config.global();
+        var oauth =
+            JwtProvider.builder()
+                .issuer(config.get("se.jwt.verify.issuer").asString().get())
+                .verifyJwk(
+                    Resource.create(
+                        config
+                            .get("se.jwt.verify.publickey.location")
+                            .asString()
+                            .map(URI::create)
+                            .orElseThrow()))
+                .build();
+
+        Security security = Security.builder().addProvider(oauth).build();
+        var securityFeature =
+            SecurityFeature.create(
+                sfb ->
+                    sfb.security(security)
+                        .addPath(p -> p.path("/hello").handler(h -> h.authenticate(true))));
+
+        WebServer.builder()
+            .config(config.get("server"))
+            .routing(HelloApplication::routing)
+            .addFeature(ContextFeature.create())
+            .addFeature(securityFeature)
+            .build()
+            .start();
+    }
+
+    /**
+     * Updates HTTP Routing.
+     */
+    static void routing(HttpRouting.Builder routing) {
+        routing.addFeature(new HelloResource());
     }
 }
 ----
 
-. Add your Auth0 endpoints to `src/main/resources/META-INF/microprofile-config.properties`.
+. Add your Auth0 endpoints to `src/main/resources/application.properties`.
 +
 [source,properties]
 ----
-mp.jwt.verify.issuer=https://<your-auth0-domain>/
-mp.jwt.verify.publickey.location=${mp.jwt.verify.issuer}.well-known/jwks.json
+se.jwt.verify.issuer=https://<your-auth0-domain>/
+se.jwt.verify.publickey.location=${se.jwt.verify.issuer}.well-known/jwks.json
 ----
 
 === Run and Test Your Helidon REST API with HTTPie
@@ -379,11 +429,13 @@ mp.jwt.verify.publickey.location=${mp.jwt.verify.issuer}.well-known/jwks.json
 
 === Build a native Helidon app with GraalVM
 
-. Update `src/main/resources/META-INF/native-image/com/okta/rest/helidon/native-image.properties` so native compilation will work with Java 21.
+. Update `src/main/resources/META-INF/native-image/com.okta.rest/helidon/native-image.properties` so native compilation will work with Java 21.
 +
 [source,properties]
 ----
-Args=--initialize-at-build-time=com.okta.rest -H:+AddAllCharsets
+Args=--initialize-at-build-time=com.okta.rest \
+ --enable-url-protocols=https \
+ --report-unsupported-elements-at-runtime
 ----
 
 . Compile your Helidon app into a native executable using the `native-image` profile:
@@ -408,11 +460,9 @@ TIP: Use the link:start.sh[`start.sh`] script to get the real time, not what eac
 +
 ----
 Micronaut: (51 + 50 + 51 + 47 + 47) / 5 = 49.2
-Micronaut (optimized): (49 + 50 + 48 + 52 + 57) / 5 = 51.2
 Quarkus: (48 + 44 + 46 + 49 + 54) / 5 = 48.2
 Spring Boot: (70 + 70 + 75 + 73 + 69) / 5 = 71.4
 Helidon: (66 + 68 + 62 + 64 + 73) / 5 = 66.6
-Helidon (optimized): (42 + 44 +68 + 49 + 66) / 5 = 53.8
 ----
 
 .Native Java startup times in milliseconds
@@ -420,11 +470,9 @@ Helidon (optimized): (42 + 44 +68 + 49 + 66) / 5 = 53.8
 |Framework | Command executed | Milliseconds to start
 
 |Micronaut | `./micronaut/build/native/nativeCompile/app` | 49.2
-|Micronaut (optimized) | `./micronaut/build/native/nativeOptimizedCompile/app` | 51.2
 |Quarkus | `./quarkus/build/quarkus-1.0.0-SNAPSHOT-runner` | 48.2
 |Spring Boot | `./spring-boot/build/native/nativeCompile/spring-boot` | 71.4
 |Helidon | `./helidon/target/helidon` | 66.6
-|Helidon (optimized) | https://github.com/oktadev/auth0-java-rest-api-examples/pull/2[auth0-java-rest-api-examples/pull/2] | 53.8
 |===
 
 == Memory Usage Comparison
@@ -443,11 +491,9 @@ Substitute `<executable>` as follows:
 |Framework | Executable | Megabytes after startup | Megabytes after 1 request| Megabytes after 10 requests
 
 |Micronaut | `app` | 53 | 62 | 66
-|Micronaut (optimized) | `app` | 53 | 63 | 67
 |Quarkus | `quarkus` | 37 | 48 | 52
 |Spring Boot | `spring-boot` | 76 | 86 | 87
 |Helidon | `helidon` | 82 | 92 | 93
-|Helidon (optimized) | `helidon` | 62 | 72 | 73
 |===
 
 IMPORTANT: If you disagree with these numbers and think X framework should be faster, I encourage you to clone https://github.com/oktadev/auth0-java-rest-api-examples[this repo] and run these tests yourself.
