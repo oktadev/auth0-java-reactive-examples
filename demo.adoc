@@ -228,11 +228,9 @@ For more information, see Quarkus' https://quarkus.io/guides/getting-started-rea
 [source,shell]
 ----
 sdk install springboot
-spring init -d=webflux,oauth2-resource-server,native -b=3.2.0 \
+spring init -d=webflux,oauth2-resource-server,native \
   --group-id=com.okta.rest --package-name=com.okta.rest spring-boot
 ----
-+
-CAUTION: Spring Boot 3.2.1 https://github.com/oktadev/auth0-java-rest-api-examples/pull/58#issuecomment-1877844650[does not work with GraalVM].
 
 . Add a `HelloController` class that returns the user's information: [`sb-hello`]
 +
@@ -496,12 +494,13 @@ Substitute `<executable>` as follows:
 |Helidon | `helidon` | 82 | 92 | 93
 |===
 
-IMPORTANT: If you disagree with these numbers and think X framework should be faster, I encourage you to clone https://github.com/oktadev/auth0-java-rest-api-examples[this repo] and run these tests yourself.
+IMPORTANT: If you disagree with these numbers and think X framework should be faster, I encourage you to clone https://github.com/oktadev/auth0-java-rest-api-reactive-examples[this repo] and run these tests yourself.
 
 ----
 ./build.sh
 ./start.sh micronaut|quarkus|spring-boot|helidon
 ./memory.sh $TOKEN micronaut|quarkus|spring-boot|helidon
+./start-docker.sh mraible/<framework>-reactive
 ----
 
 == Native Reactive Java REST APIs FTW!
