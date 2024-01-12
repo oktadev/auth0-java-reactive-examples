@@ -9,7 +9,7 @@ In this demo, I'll show how to create native images with Micronaut, Quarkus, Spr
 
 **Prerequisites:**
 
-- https://sdkman.io/[SDKMAN] (for Java 20 with GraalVM)
+- https://sdkman.io/[SDKMAN] (for Java 21 with GraalVM)
 - https://httpie.io/[HTTPie] (a better version of cURL)
 - A free https://auth0.com/signup[Auth0 account] and the https://github.com/auth0/auth0-cli#installation[Auth0 CLI]
 
@@ -19,9 +19,9 @@ toc::[]
 
 == Install a JDK with GraalVM
 
-Use SDKMAN to install Java 20 with GraalVM
+Use SDKMAN to install Java 21 with GraalVM
 
-  sdk install java 20.0.2-graalce
+  sdk install java 21.0.1-graalce
 
 == Generate an OAuth 2.0 Access Token
 
@@ -32,7 +32,7 @@ Use SDKMAN to install Java 20 with GraalVM
 +
 [source,shell]
 ----
-auth0 test token -a https://<your-auth0-domain>/api/v2/
+auth0 test token -a https://<your-auth0-domain>/api/v2/ -s openid
 ----
 
 . Set the access token as a `TOKEN` environment variable in a terminal window.
@@ -114,13 +114,13 @@ You should get a 200 response with your user id in it.
 == Create a Java REST API with Quarkus
 
 . Use SDKMAN to install the Quarkus CLI and create a new app with JWT support:
-
++
 [source,shell]
 ----
 sdk install quarkus
 quarkus create app com.okta.rest:quarkus \
-    --extension="smallrye-jwt,resteasy-reactive" \
-    --gradle
+  --extension="smallrye-jwt,resteasy-reactive" \
+  --gradle
 ----
 
 . Rename `GreetingResource.java` to `HelloResource.java` and add user information to the `hello()` method: [`qk-hello`]
@@ -222,9 +222,11 @@ public class HelloResourceTest {
 [source,shell]
 ----
 sdk install springboot
-spring init -d=web,oauth2-resource-server,native \
-  --package-name=com.okta.rest spring-boot
+spring init -d=web,oauth2-resource-server,native -b=3.2.0 \
+  --group-id=com.okta.rest --package-name=com.okta.rest spring-boot
 ----
++
+CAUTION: Spring Boot 3.2.1 https://github.com/oktadev/auth0-java-rest-api-examples/pull/58#issuecomment-1877844650[does not work with GraalVM].
 
 . Add a `HelloController` class that returns the user's information: [`sb-hello`]
 +
@@ -283,15 +285,11 @@ TIP: To build a native app and a Docker container, use the Spring Boot Gradle pl
 
 == Build a Java REST API with Helidon
 
-. Install the https://helidon.io/docs/latest/#/about/cli[Helidon CLI].
-
-// SDKMAN support is coming soon! https://sdkman.io/sdks#helidon
-// https://github.com/helidon-io/helidon-build-tools/issues/352
-
-. Create a Helidon app with OAuth 2.0 support:
+. Use SDKMAN to install the Helidon CLI. Then, create a Helidon app:
 +
 [source,shell]
 ----
+sdk install helidon
 helidon init --flavor MP --groupid com.okta.rest \
   --artifactid helidon --package com.okta.rest --batch
 ----
@@ -381,13 +379,14 @@ mp.jwt.verify.publickey.location=${mp.jwt.verify.issuer}.well-known/jwks.json
 
 === Build a native Helidon app with GraalVM
 
-. Update `src/main/resources/META-INF/native-image/com.okta.rest/helidon/native-image.properties` so native compilation will work with Java 20.
+. Update `src/main/resources/META-INF/native-image/com/okta/rest/helidon/native-image.properties` so native compilation will work with Java 21.
 +
 [source,properties]
 ----
 Args=--initialize-at-build-time=com.okta.rest \
   --initialize-at-run-time=io.helidon.openapi.ExpandedTypeDescription \
-  --report-unsupported-elements-at-runtime
+  --report-unsupported-elements-at-runtime \
+  -H:+AddAllCharsets
 ----
 
 . Compile your Helidon app into a native executable using the `native-image` profile:
@@ -405,42 +404,30 @@ Args=--initialize-at-build-time=com.okta.rest \
 == Startup Time Comparison
 
 . Run each image three times before recording the numbers, then each command five times.
++
+TIP: Use the link:start.sh[`start.sh`] script to get the real time, not what each framework prints to the console.
 
 . Write each time down, add them up, and divide by five for the average. For example:
 +
 ----
-Micronaut: (21 + 18 + 21 + 17 + 18) / 5 = 19
-Quarkus: (26 + 27 + 22 + 28 + 26) / 5 = 25.8
-Spring Boot: (42 + 41 + 40 + 43 + 41) / 5 = 41.4
-Helidon: (55 + 50 + 47 + 45 + 58) / 5 = 51
-Helidon (optimized): (35 + 35 + 37 + 36 + 37) / 5 = 36
+Micronaut: (51 + 50 + 51 + 47 + 47) / 5 = 49.2
+Micronaut (optimized): (49 + 50 + 48 + 52 + 57) / 5 = 51.2
+Quarkus: (48 + 44 + 46 + 49 + 54) / 5 = 48.2
+Spring Boot: (70 + 70 + 75 + 73 + 69) / 5 = 71.4
+Helidon: (66 + 68 + 62 + 64 + 73) / 5 = 66.6
+Helidon (optimized): (42 + 44 +68 + 49 + 66) / 5 = 53.8
 ----
-
-////
-June 2023:
-- Micronaut: 33.4
-- Micronaut (optimized): 23.8
-- Quarkus: 25.8
-- Spring Boot: 39.8
-- Helidon: 47.6
-- Helidon (optimized): 33.2
-
-October 2022:
-- Micronaut was 18
-- Quarkus was 20.6
-- Spring Boot was 39
-- Helidon was 43.2
-////
 
 .Native Java startup times in milliseconds
 |===
 |Framework | Command executed | Milliseconds to start
 
-|Micronaut | `./micronaut/build/native/nativeCompile/app` | 19
-|Quarkus | `./quarkus/build/quarkus-1.0.0-SNAPSHOT-runner` | 25.8
-|Spring Boot | `./spring-boot/build/native/nativeCompile/spring-boot` | 41.4
-|Helidon | `./helidon/target/helidon` | 51
-|Helidon (optimized) | https://github.com/oktadev/auth0-java-rest-api-examples/pull/2[auth0-java-rest-api-examples/pull/2] | 36
+|Micronaut | `./micronaut/build/native/nativeCompile/app` | 49.2
+|Micronaut (optimized) | `./micronaut/build/native/nativeOptimizedCompile/app` | 51.2
+|Quarkus | `./quarkus/build/quarkus-1.0.0-SNAPSHOT-runner` | 48.2
+|Spring Boot | `./spring-boot/build/native/nativeCompile/spring-boot` | 71.4
+|Helidon | `./helidon/target/helidon` | 66.6
+|Helidon (optimized) | https://github.com/oktadev/auth0-java-rest-api-examples/pull/2[auth0-java-rest-api-examples/pull/2] | 53.8
 |===
 
 == Memory Usage Comparison
@@ -456,84 +443,22 @@ Substitute `<executable>` as follows:
 
 .Native Java memory used in megabytes
 |===
-|Framework | Executable | Megabytes before request | Megabytes after request| Megabytes after 5 requests
+|Framework | Executable | Megabytes after startup | Megabytes after 1 request| Megabytes after 10 requests
 
-|Micronaut | `app` | 46 | 62 | 64
-|Quarkus | `quarkus` | 37 | 51 | 52
-|Spring Boot | `spring-boot` | 71 | 94 | 95
-|Helidon | `helidon` | 76 | 95 | 113
-|Helidon (optimized) | `helidon` | 59 | 84 | 102
+|Micronaut | `app` | 53 | 62 | 66
+|Micronaut (optimized) | `app` | 53 | 63 | 67
+|Quarkus | `quarkus` | 37 | 48 | 52
+|Spring Boot | `spring-boot` | 76 | 86 | 87
+|Helidon | `helidon` | 82 | 92 | 93
+|Helidon (optimized) | `helidon` | 62 | 72 | 73
 |===
 
 IMPORTANT: If you disagree with these numbers and think X framework should be faster, I encourage you to clone https://github.com/oktadev/auth0-java-rest-api-examples[this repo] and run these tests yourself.
 
-== What about Reactive?
-
-All of these framework have reactive features. You can create reactive versions of each app with the following changes.
-
-=== Micronaut Reactive
-
-Nothing needs to be done to make Micronaut reactive. It has no separate reactive web framework. See Piotr Minkowski's https://piotrminkowski.com/2019/11/12/micronaut-tutorial-reactive/[Micronaut Tutorial: Reactive] and https://guides.micronaut.io/latest/tag-reactive.html[Micronaut's Reactive Guides] for more information.
-
-=== Quarkus Reactive
-
-To convert the Quarkus application to reactive, change the SmallRye JWT dependency to Quarkus OIDC in `build.gradle`:
-
-[source,gradle]
 ----
-implementation 'io.quarkus:quarkus-oidc'
-----
-
-Change the `application.properties` to use OIDC:
-
-[source,properties]
-----
-quarkus.oidc.auth-server-url=https://<your-auth0-domain>
-----
-
-And update `HelloResource.java` to read the name from the JWT:
-
-[source,java]
-----
-package com.okta.rest;
-
-import io.quarkus.security.Authenticated;
-import io.smallrye.mutiny.Uni;
-import jakarta.inject.Inject;
-import jakarta.ws.rs.GET;
-import jakarta.ws.rs.Path;
-import jakarta.ws.rs.Produces;
-import jakarta.ws.rs.core.MediaType;
-import org.eclipse.microprofile.jwt.JsonWebToken;
-
-@Path("/hello")
-public class HelloResource {
-
-    @Inject
-    JsonWebToken jwt;
-
-    @GET
-    @Path("/")
-    @Authenticated
-    @Produces(MediaType.TEXT_PLAIN)
-    public Uni<String> hello() {
-        return Uni.createFrom().item("Hello, " + jwt.getName() + "!");
-    }
-
-}
-----
-
-For more information, see Quarkus' https://quarkus.io/guides/getting-started-reactive[Getting Started with Reactive] guide.
-
-=== Spring Boot Reactive
-
-https://docs.spring.io/spring-framework/reference/web/webflux.html[Spring WebFlux] is the reactive web framework for Spring Boot.
-
-To convert the Spring Boot application to reactive, change the Spring Web dependency be WebFlux:
-
-[source,gradle]
-----
-implementation 'org.springframework.boot:spring-boot-starter-webflux'
+./build.sh
+./start.sh micronaut|quarkus|spring-boot|helidon
+./memory.sh $TOKEN micronaut|quarkus|spring-boot|helidon
 ----
 
 == Native Java REST APIs FTW!
