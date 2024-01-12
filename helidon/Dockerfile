@@ -16,8 +16,8 @@ WORKDIR /helidon
 # Create a first layer to cache the "Maven World" in the local repository.
 # Incremental docker builds will always resume after that, unless you update
 # the pom
-ADD pom.xml .
-RUN mvn package -Dmaven.test.skip -Declipselink.weave.skip -Declipselink.weave.skip -DskipOpenApiGenerate
+ADD pom.xml pom.xml
+RUN mvn package -Dmaven.test.skip -Declipselink.weave.skip 
 
 # Do the Maven build!
 # Incremental docker builds will resume here when you change sources
@@ -31,9 +31,9 @@ FROM container-registry.oracle.com/java/openjdk:21
 WORKDIR /helidon
 
 # Copy the binary built in the 1st stage
-COPY --from=build /helidon/target/helidon.jar ./
+COPY --from=build /helidon/target/helidon-se.jar ./
 COPY --from=build /helidon/target/libs ./libs
 
-CMD ["java", "-jar", "helidon.jar"]
+CMD ["java", "-jar", "helidon-se.jar"]
 
 EXPOSE 8080

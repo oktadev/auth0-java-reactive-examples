@@ -1,6 +1,6 @@
 # helidon
 
-Sample Helidon MP project that includes multiple REST operations.
+Minimal Helidon SE project suitable to start from scratch.
 
 ## Build and run
 
@@ -12,15 +12,11 @@ java -jar target/helidon.jar
 ```
 
 ## Exercise the application
-
-Basic:
 ```
 curl -X GET http://localhost:8080/simple-greet
-Hello World!
+{"message":"Hello World!"}
 ```
 
-
-JSON:
 ```
 curl -X GET http://localhost:8080/greet
 {"message":"Hello World!"}
@@ -61,21 +57,29 @@ curl -s -X GET http://localhost:8080/health
 ```
 
 
+
 ## Building a Native Image
 
-The generation of native binaries requires an installation of GraalVM 22.1.0+.
-
-You can build a native binary using Maven as follows:
+Make sure you have GraalVM locally installed:
 
 ```
-mvn -Pnative-image install -DskipTests
+$GRAALVM_HOME/bin/native-image --version
 ```
 
-The generation of the executable binary may take a few minutes to complete depending on
-your hardware and operating system. When completed, the executable file will be available
-under the `target` directory and be named after the artifact ID you have chosen during the
-project generation phase.
+Build the native image using the native image profile:
 
+```
+mvn package -Pnative-image
+```
+
+This uses the helidon-maven-plugin to perform the native compilation using your installed copy of GraalVM. It might take a while to complete.
+Once it completes start the application using the native executable (no JVM!):
+
+```
+./target/helidon
+```
+
+Yep, it starts fast. You can exercise the application’s endpoints as before.
 
 
 ## Building the Docker Image
@@ -91,35 +95,6 @@ docker run --rm -p 8080:8080 helidon:latest
 ```
 
 Exercise the application as described above.
-                                
-
-## Run the application in Kubernetes
-
-If you don’t have access to a Kubernetes cluster, you can [install one](https://helidon.io/docs/latest/#/about/kubernetes) on your desktop.
-
-### Verify connectivity to cluster
-
-```
-kubectl cluster-info                        # Verify which cluster
-kubectl get pods                            # Verify connectivity to cluster
-```
-
-### Deploy the application to Kubernetes
-
-```
-kubectl create -f app.yaml                  # Deploy application
-kubectl get pods                            # Wait for quickstart pod to be RUNNING
-kubectl get service  helidon         # Get service info
-```
-
-Note the PORTs. You can now exercise the application as you did before but use the second
-port number (the NodePort) instead of 8080.
-
-After you’re done, cleanup.
-
-```
-kubectl delete -f app.yaml
-```
                                 
 
 ## Building a Custom Runtime Image

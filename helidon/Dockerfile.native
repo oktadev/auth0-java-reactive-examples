@@ -32,8 +32,8 @@ FROM scratch
 WORKDIR /helidon
 
 # Copy the binary built in the 1st stage
-COPY --from=build /helidon/target/helidon .
+COPY --from=build /helidon/target/helidon-se .
 
-ENTRYPOINT ["./helidon"]
+ENTRYPOINT ["./helidon-se"]
 
 EXPOSE 8080
