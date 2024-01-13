@@ -3,7 +3,7 @@
 :toc: macro
 :source-highlighter: highlight.js
 
-=  Native Reactive Java REST API Demo Steps
+= Reactive Java REST API Demo Steps
 
 In this demo, I'll show how to create native images with reactive versions of Micronaut, Quarkus, Spring Boot, and Helidon. You'll see how to run a secure, OAuth 2.0-protected, reactive Java REST API that allows JWT authentication.
 
