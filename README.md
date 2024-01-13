@@ -13,9 +13,9 @@ Visit [@oktadev/auth0-java-rest-api-examples](https://github.com/oktadev/auth0-j
 
 ## Getting Started
 
-Click the button below to start a new GitPod development environment with this project:
+Click the button below to start a new Gitpod development environment with this project:
 
-[![Open in GitPod](https://gitpod.io/button/open-in-gitpod.svg)](https://gitpod.io/#https://github.com/oktadev/auth0-java-reactive-examples)
+[![Open in Gitpod](https://gitpod.io/button/open-in-gitpod.svg)](https://gitpod.io/#https://github.com/oktadev/auth0-java-reactive-examples)
 
 Or, if you'd rather try things locally, clone this repository:
 
