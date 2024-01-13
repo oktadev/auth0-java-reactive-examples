@@ -2,6 +2,8 @@
 
 This repository contains example OAuth 2.0 resource servers built with reactive versions of Micronaut, Quarkus, Spring Boot, and Helidon. See [this demo script](demo.adoc) to learn how these apps were created.
 
+Visit [@oktadev/auth0-java-rest-api-examples](https://github.com/oktadev/auth0-java-rest-api-examples) for examples using the non-reactive versions of these frameworks.
+
 **Prerequisites:** [Java 21 with GraalVM](https://sdkman.io/) and [HTTPie](https://httpie.io/).
 
 * [Getting Started](#getting-started)
