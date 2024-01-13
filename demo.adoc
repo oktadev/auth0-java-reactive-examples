@@ -455,20 +455,20 @@ TIP: Use the link:start.sh[`start.sh`] script to get the real time, not what eac
 . Write each time down, add them up, and divide by five for the average. For example:
 +
 ----
-Micronaut: (51 + 50 + 51 + 47 + 47) / 5 = 49.2
-Quarkus: (48 + 44 + 46 + 49 + 54) / 5 = 48.2
-Spring Boot: (70 + 70 + 75 + 73 + 69) / 5 = 71.4
-Helidon: (66 + 68 + 62 + 64 + 73) / 5 = 66.6
+Micronaut: () / 5 =
+Quarkus: () / 5 =
+Spring Boot: () / 5 =
+Helidon: () / 5 =
 ----
 
 .Native Java startup times in milliseconds
 |===
 |Framework | Command executed | Milliseconds to start
 
-|Micronaut | `./micronaut/build/native/nativeCompile/app` | 49.2
-|Quarkus | `./quarkus/build/quarkus-1.0.0-SNAPSHOT-runner` | 48.2
-|Spring Boot | `./spring-boot/build/native/nativeCompile/spring-boot` | 71.4
-|Helidon | `./helidon/target/helidon` | 66.6
+|Micronaut | `./micronaut/build/native/nativeCompile/app` | a
+|Quarkus | `./quarkus/build/quarkus-1.0.0-SNAPSHOT-runner` | b
+|Spring Boot | `./spring-boot/build/native/nativeCompile/spring-boot` | c
+|Helidon | `./helidon/target/helidon` | d
 |===
 
 == Memory Usage Comparison
@@ -486,13 +486,13 @@ Substitute `<executable>` as follows:
 |===
 |Framework | Executable | Megabytes after startup | Megabytes after 1 request| Megabytes after 10 requests
 
-|Micronaut | `app` | 53 | 62 | 66
-|Quarkus | `quarkus` | 37 | 48 | 52
-|Spring Boot | `spring-boot` | 76 | 86 | 87
-|Helidon | `helidon` | 82 | 92 | 93
+|Micronaut | `app` | x | y | z
+|Quarkus | `quarkus` | x | y | z
+|Spring Boot | `spring-boot` | x | y | z
+|Helidon | `helidon` | x | y | z
 |===
 
-IMPORTANT: If you disagree with these numbers and think X framework should be faster, I encourage you to clone https://github.com/oktadev/auth0-java-rest-api-reactive-examples[this repo] and run these tests yourself.
+IMPORTANT: If you disagree with these numbers and think X framework should be faster, I encourage you to clone https://github.com/oktadev/auth0-java-reactive-examples[this repo] and run these tests yourself.
 
 ----
 ./build.sh
@@ -503,4 +503,4 @@ IMPORTANT: If you disagree with these numbers and think X framework should be fa
 
 == Native Reactive Java REST APIs FTW!
 
-🚀 Find the code on GitHub: https://github.com/oktadev/auth0-java-rest-api-reactive-examples[@oktadev/auth0-java-rest-api-reactive-examples]
+🚀 Find the code on GitHub: https://github.com/oktadev/auth0-java-reactive-examples[@oktadev/auth0-java-reactive-examples]
