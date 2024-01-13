@@ -431,9 +431,7 @@ se.jwt.verify.publickey.location=${se.jwt.verify.issuer}.well-known/jwks.json
 +
 [source,properties]
 ----
-Args=--initialize-at-build-time=com.okta.rest \
- --enable-url-protocols=https \
- --report-unsupported-elements-at-runtime
+Args=--initialize-at-build-time=com.okta.rest --enable-url-protocols=https
 ----
 
 . Compile your Helidon app into a native executable using the `native-image` profile:
