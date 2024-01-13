@@ -11,7 +11,11 @@ This repository contains example OAuth 2.0 resource servers built with reactive 
 
 ## Getting Started
 
-First, clone this repository:
+Click the button below to start a new GitPod development environment with this project:
+
+[![Open in GitPod](https://gitpod.io/button/open-in-gitpod.svg)](https://gitpod.io/#https://github.com/oktadev/auth0-java-reactive-examples)
+
+Or, if you'd rather try things locally, clone this repository:
 
 ```bash
 git clone https://github.com/oktadev/auth0-java-rest-api-reactive-examples.git
