@@ -15,9 +15,6 @@ case "$selected_app" in
   "micronaut")
     start_command="./micronaut/build/native/nativeCompile/app"
     ;;
-  "micronaut-optimized")
-    start_command="./micronaut/build/native/nativeOptimizedCompile/app"
-    ;;
   "quarkus")
     start_command="./quarkus/build/quarkus-1.0.0-SNAPSHOT-runner"
     ;;

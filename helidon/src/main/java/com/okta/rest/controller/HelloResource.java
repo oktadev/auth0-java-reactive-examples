@@ -1,18 +1,25 @@
 package com.okta.rest.controller;
 
+import static io.helidon.http.Status.OK_200;
+
+import io.helidon.common.media.type.MediaTypes;
 import io.helidon.security.SecurityContext;
-import io.helidon.security.annotations.Authenticated;
+import io.helidon.webserver.http.HttpFeature;
+import io.helidon.webserver.http.HttpRouting;
+import io.helidon.webserver.http.ServerRequest;
+import io.helidon.webserver.http.ServerResponse;
 
-import jakarta.ws.rs.GET;
-import jakarta.ws.rs.Path;
-import jakarta.ws.rs.core.Context;
+public class HelloResource implements HttpFeature {
 
-@Path("/hello")
-public class HelloResource {
+    @Override
+    public void setup(HttpRouting.Builder routing) {
+        routing.get("/hello", this::hello);
+    }
 
-    @Authenticated
-    @GET
-    public String hello(@Context SecurityContext context) {
-        return "Hello, " + context.userName() + "!";
+    public void hello(ServerRequest req, ServerResponse res) {
+        SecurityContext context = req.context().get(SecurityContext.class).orElseThrow();
+        res.status(OK_200);
+        res.headers().contentType(MediaTypes.TEXT_PLAIN);
+        res.send("Hello, " + context.userName() + "!");
     }
 }

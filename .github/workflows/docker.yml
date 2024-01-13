@@ -29,7 +29,7 @@ jobs:
         run: |
           cd micronaut
           ./gradlew dockerBuildNative
-          docker tag app:latest mraible/micronaut:latest
+          docker tag app-reactive:latest mraible/micronaut-reactive:latest
         shell: bash
 
       - name: Build Quarkus project
@@ -37,42 +37,42 @@ jobs:
           cd quarkus
           ./gradlew build -Dquarkus.package.type=native -Dquarkus.native.container-build=true
           docker build -f src/main/docker/Dockerfile.native -t quarkus .
-          docker tag quarkus:latest mraible/quarkus:latest
+          docker tag quarkus-reactive:latest mraible/quarkus-reactive:latest
         shell: bash
 
       - name: Build Spring Boot project
         run: |
           cd spring-boot
           ./gradlew bootBuildImage --imageName=spring-boot
-          docker tag spring-boot:latest mraible/spring-boot:latest
+          docker tag spring-boot-reactive:latest mraible/spring-boot-reactive:latest
         shell: bash
 
       - name: Build Helidon project
         run: |
           cd helidon
           docker build -t helidon -f Dockerfile.native .
-          docker tag helidon:latest mraible/helidon:latest
+          docker tag helidon-reactive:latest mraible/helidon-reactive:latest
         shell: bash
 
       - name: Login to DockerHub
         run: docker login -u ${{ secrets.DOCKERHUB_USERNAME }} -p ${{ secrets.DOCKERHUB_PASSWORD }}
 
-      - name: Publish Micronaut Docker image to DockerHub
+      - name: Publish Micronaut Reactive Docker image to DockerHub
         run: |
-          docker push mraible/micronaut:latest
+          docker push mraible/micronaut-reactive:latest
         shell: bash
 
-      - name: Publish Quarkus Docker image to DockerHub
+      - name: Publish Quarkus Reactive Docker image to DockerHub
         run: |
-          docker push mraible/quarkus:latest
+          docker push mraible/quarkus-reactive:latest
         shell: bash
 
-      - name: Publish Spring Boot Docker image to DockerHub
+      - name: Publish Spring Boot WebFlux Docker image to DockerHub
         run: |
-          docker push mraible/spring-boot:latest
+          docker push mraible/spring-boot-reactive:latest
         shell: bash
 
-      - name: Publish Helidon Docker image to DockerHub
+      - name: Publish Helidon SE Docker image to DockerHub
         run: |
-          docker push mraible/helidon:latest
+          docker push mraible/helidon-reactive:latest
         shell: bash
