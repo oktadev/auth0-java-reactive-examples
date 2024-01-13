@@ -48,7 +48,7 @@ Change the following files for each framework to match your Auth0 domain:
 - Micronaut: `micronaut/src/main/resources/application.properties`
 - Quarkus: `quarkus/src/main/resources/application.properties`
 - Spring Boot: `spring-boot/src/main/resources/application.properties`
-- Helidon: `helidon/src/main/resources/META-INF/microprofile-config.properties`
+- Helidon: `helidon/src/main/resources/application.properties`
 
 You can start each app using its CLI, Gradle, or Maven. Note that you will only be able to start one at a time since they all run on port 8080.
 
