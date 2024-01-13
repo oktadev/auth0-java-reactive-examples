@@ -18,7 +18,7 @@ Click the button below to start a new GitPod development environment with this p
 Or, if you'd rather try things locally, clone this repository:
 
 ```bash
-git clone https://github.com/oktadev/auth0-java-rest-api-reactive-examples.git
+git clone https://github.com/oktadev/auth0-java-reactive-examples.git
 ```
 
 You will need a JDK with GraalVM and its native-image compiler. Using [SDKMAN](https://sdkman.io), run the following command and set it as the default:
