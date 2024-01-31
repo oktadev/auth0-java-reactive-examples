@@ -120,9 +120,7 @@ You should get a 200 response with your user id in it.
 [source,shell]
 ----
 sdk install quarkus
-quarkus create app com.okta.rest:quarkus \
-  --extension="quarkus-oidc,resteasy-reactive" \
-  --gradle
+quarkus create app com.okta.rest:quarkus --extension="quarkus-oidc,resteasy-reactive" --gradle
 ----
 
 . Rename `GreetingResource.java` to `HelloResource.java` and add user information to the `hello()` method: [`qk-hello`]
