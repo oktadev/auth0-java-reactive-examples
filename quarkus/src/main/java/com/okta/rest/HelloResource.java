@@ -1,26 +1,27 @@
 package com.okta.rest;
 
 import io.quarkus.security.Authenticated;
-import io.smallrye.mutiny.Uni;
+import io.quarkus.security.identity.SecurityIdentity;
+import io.smallrye.common.annotation.NonBlocking;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.MediaType;
-import org.eclipse.microprofile.jwt.JsonWebToken;
 
 @Path("/hello")
 public class HelloResource {
 
     @Inject
-    JsonWebToken jwt;
+    SecurityIdentity securityIdentity;
 
     @GET
     @Path("/")
     @Authenticated
     @Produces(MediaType.TEXT_PLAIN)
-    public Uni<String> hello() {
-        return Uni.createFrom().item("Hello, " + jwt.getName() + "!");
+    @NonBlocking
+    public String hello() {
+        return "Hello, " + securityIdentity.getPrincipal().getName() + "!";
     }
 
 }
