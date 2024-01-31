@@ -156,11 +156,14 @@ public class HelloResource {
 }
 ----
 
-. Add your Auth0 issuer to `src/main/resources/application.properties`:
+. Add your Auth0 issuer to `src/main/resources/application.properties` and configure Quarkus to lazy-load the JSON Web Key Set (JWKS):
 +
 [source,properties]
 ----
 quarkus.oidc.auth-server-url=https://<your-auth0-domain>
+quarkus.oidc.jwks.resolve-early=false
+quarkus.oidc.discovery-enabled=false
+quarkus.oidc.jwks-path=${quarkus.oidc.auth-server-url}/.well-known/jwks.json
 ----
 
 . Rename `GreetingResourceTest` to `HelloResourceTest` and modify it to expect a 401 instead of a 200:
