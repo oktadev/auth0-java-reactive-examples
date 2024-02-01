@@ -22,7 +22,6 @@ public class HelloApplication {
 
         System.out.printf("""
             Server started in %2$d ms
-
             Started server at http://localhost:%1$d
             """, server.port(), TimeUnit.MILLISECONDS.convert(time, TimeUnit.NANOSECONDS));
     }
