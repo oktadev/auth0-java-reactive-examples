@@ -1,4 +1,4 @@
-package com.okta.rest.controller;
+package com.okta.rest.resource;
 
 import static io.helidon.http.Status.OK_200;
 

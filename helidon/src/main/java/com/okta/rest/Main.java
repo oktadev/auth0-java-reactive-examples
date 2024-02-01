@@ -1,17 +1,18 @@
 package com.okta.rest;
 
-import com.okta.rest.controller.HelloResource;
+import com.okta.rest.resource.HelloResource;
 import io.helidon.config.Config;
-import io.helidon.config.ConfigSources;
+import io.helidon.logging.common.LogConfig;
 import io.helidon.webserver.WebServer;
 import io.helidon.webserver.WebServerConfig;
 import io.helidon.webserver.security.SecurityHttpFeature;
 
 import java.util.concurrent.TimeUnit;
 
-public class HelloApplication {
+public class Main {
 
     public static void main(String[] args) {
+        LogConfig.configureRuntime();
         WebServerConfig.Builder builder = WebServer.builder();
         setup(builder);
         WebServer server = builder.port(8080).build();
@@ -26,7 +27,8 @@ public class HelloApplication {
     }
 
     static void setup(WebServerConfig.Builder server) {
-        Config config = Config.create(ConfigSources.classpath("application.yml"));
+        Config config = Config.create();
+        Config.global(config);
 
         server.routing(routing -> routing
             .addFeature(SecurityHttpFeature.create(config.get("security.web-server")))

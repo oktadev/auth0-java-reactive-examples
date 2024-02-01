@@ -302,10 +302,19 @@ helidon init --flavor SE --groupid com.okta.rest \
 +
 TIP: See https://blogs.oracle.com/developers/post/migrating-a-helidon-se-application-to-gradle[Migrating a Helidon SE application to Gradle] for Gradle support.
 
-. Add MicroProfile JWT support in `pom.xml`:
+. Delete the default Java classes created by the Helidon CLI:
+
+- On Windows: `del /s *.java`
+- On Mac/Linux: `find . -name '*.java' -delete`
+
+. Add JWT authentication support in `pom.xml`:
 +
 [source,xml]
 ----
+<dependency>
+    <groupId>io.helidon.webserver</groupId>
+    <artifactId>helidon-webserver-security</artifactId>
+</dependency>
 <dependency>
     <groupId>io.helidon.security.providers</groupId>
     <artifactId>helidon-security-providers-jwt</artifactId>
@@ -316,7 +325,7 @@ TIP: See https://blogs.oracle.com/developers/post/migrating-a-helidon-se-applica
 +
 [source,java]
 ----
-package com.okta.rest.controller;
+package com.okta.rest.resource;
 
 import static io.helidon.http.Status.OK_200;
 
@@ -343,24 +352,25 @@ public class HelloResource implements HttpFeature {
 }
 ----
 
-. Add a `HelloApplication` class in `src/main/java/com/okta/rest` to register your resource and configure JWT authentication:
+. Create a `Main` class in `src/main/java/com/okta/rest` to register your resource and configure JWT authentication:
 +
 [source,java]
 ----
 package com.okta.rest;
 
-import com.okta.rest.controller.HelloResource;
+import com.okta.rest.resource.HelloResource;
 import io.helidon.config.Config;
-import io.helidon.config.ConfigSources;
+import io.helidon.logging.common.LogConfig;
 import io.helidon.webserver.WebServer;
 import io.helidon.webserver.WebServerConfig;
 import io.helidon.webserver.security.SecurityHttpFeature;
 
 import java.util.concurrent.TimeUnit;
 
-public class HelloApplication {
+public class Main {
 
     public static void main(String[] args) {
+        LogConfig.configureRuntime();
         WebServerConfig.Builder builder = WebServer.builder();
         setup(builder);
         WebServer server = builder.port(8080).build();
@@ -375,7 +385,8 @@ public class HelloApplication {
     }
 
     static void setup(WebServerConfig.Builder server) {
-        Config config = Config.create(ConfigSources.classpath("application.yml"));
+        Config config = Config.create();
+        Config.global(config);
 
         server.routing(routing -> routing
             .addFeature(SecurityHttpFeature.create(config.get("security.web-server")))
@@ -384,7 +395,7 @@ public class HelloApplication {
 }
 ----
 
-. Create a YAML config file at `src/main/resources/application.yml`.
+. Add your security settings and routes to `src/main/resources/application.yaml`.
 +
 [source,yaml]
 ----
@@ -410,11 +421,6 @@ security:
 . Test your API with an access token.
 
   http :8080/hello Authorization:"Bearer $TOKEN"
-
-. Delete the default Java classes created by the Helidon CLI:
-
-- On Windows: `del /s *.java`
-- On Mac/Linux: `find . -name '*.java' -delete`
 
 === Build a native Helidon app with GraalVM
 
