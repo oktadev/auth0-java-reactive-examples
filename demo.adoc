@@ -452,20 +452,20 @@ TIP: Use the link:start.sh[`start.sh`] script to get the real time, not what eac
 . Write each time down, add them up, and divide by five for the average. For example:
 +
 ----
-Micronaut: (52 + 45 + 47 + 46 + 47) / 5 = 47.4
-Quarkus: (45 + 41 + 42 + 44 + 49) / 5 = 44.2
-Spring Boot: (55 + 72 + 62 + 52 + 52) / 5 = 58.6
-Helidon: (183 + 265 + 177 + 386 + 303) / 5 = 262.8
+Micronaut: (49 + 52 + 50 + 47 + 43) / 5 = 48.2
+Quarkus: (47 + 45 + 60 + 46 + 43) / 5 = 48.2
+Spring Boot: (56 + 53 + 60 + 58 + 62) / 5 = 57.8
+Helidon: (269 + 217 + 305 + 183 + 269) / 5 = 248.6
 ----
 
 .Native Java startup times in milliseconds
 |===
 |Framework | Command executed | Milliseconds to start
 
-|Micronaut | `./micronaut/build/native/nativeCompile/app` | 47.4
-|Quarkus | `./quarkus/build/quarkus-1.0.0-SNAPSHOT-runner` | 44.2
-|Spring Boot | `./spring-boot/build/native/nativeCompile/spring-boot` | 58.6
-|Helidon | `./helidon/target/helidon` | 262.8
+|Micronaut | `./micronaut/build/native/nativeCompile/app` | 48.2
+|Quarkus | `./quarkus/build/quarkus-1.0.0-SNAPSHOT-runner` | 48.2
+|Spring Boot | `./spring-boot/build/native/nativeCompile/spring-boot` | 57.8
+|Helidon | `./helidon/target/helidon` | 248.6
 |===
 
 == Memory Usage Comparison
@@ -481,12 +481,12 @@ Substitute `<executable>` as follows:
 
 .Native Java memory used in megabytes
 |===
-|Framework | Executable | Megabytes after startup | Megabytes after 1 request| Megabytes after 10K requests
+|Framework | Executable | MB after startup | MB after 1 request| MB after 10K requests
 
-|Micronaut | `app` | 53 | 62 | 102
-|Quarkus | `quarkus` | 49 | 50 | 53
-|Spring Boot | `spring-boot` | 75 | 107 | 174
-|Helidon | `helidon` | 44 | 45 | 68
+|Micronaut | `app` | 53 | 63 | 102
+|Quarkus | `quarkus` | 39 | 49 | 53
+|Spring Boot | `spring-boot` | 75 | 108 | 173
+|Helidon | `helidon` | 50 | 51 | 69
 |===
 
 IMPORTANT: If you disagree with these numbers and think X framework should be faster, I encourage you to clone https://github.com/oktadev/auth0-java-reactive-examples[this repo] and run these tests yourself.
